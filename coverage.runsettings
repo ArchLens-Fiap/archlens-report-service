@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>
+            [ArchLens.Contracts]*,
+            [ArchLens.Report.Api]Program,
+            [ArchLens.Report.Api]ArchLens.Report.Api.Configurations.*,
+            [ArchLens.Report.Infrastructure]ArchLens.Report.Infrastructure.DependencyInjection,
+            [ArchLens.Report.Infrastructure]ArchLens.Report.Infrastructure.Persistence.MongoDB.Repositories.*
+          </Exclude>
+          <ExcludeByAttribute>
+            Obsolete,
+            GeneratedCodeAttribute,
+            CompilerGeneratedAttribute,
+            ExcludeFromCodeCoverageAttribute
+          </ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
