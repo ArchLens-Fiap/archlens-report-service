@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ArchLens.Report.Application.UseCases.Reports.Queries.GetById;
 using ArchLens.Report.Application.UseCases.Reports.Queries.GetByAnalysis;
 using ArchLens.Report.Application.UseCases.Reports.Queries.List;
@@ -14,6 +15,9 @@ namespace ArchLens.Report.Api.Controllers;
 [Authorize]
 public sealed class ReportsController(IMediator mediator, IReportRepository reportRepo) : ControllerBase
 {
+    private string? GetCurrentUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -36,11 +40,12 @@ public sealed class ReportsController(IMediator mediator, IReportRepository repo
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> List([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     {
-        var result = await mediator.Send(new ListReportsQuery(page, pageSize), ct);
+        var result = await mediator.Send(new ListReportsQuery(page, pageSize, GetCurrentUserId(), false), ct);
         return Ok(result.Value);
     }
 
     [HttpGet("admin/metrics")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAdminMetrics(CancellationToken ct)
     {

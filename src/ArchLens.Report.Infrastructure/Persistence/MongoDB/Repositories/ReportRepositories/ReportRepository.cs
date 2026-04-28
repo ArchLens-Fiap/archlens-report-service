@@ -26,10 +26,14 @@ public sealed class ReportRepository : IReportRepository
         return doc is null ? null : ReportDocumentMapper.ToDomain(doc);
     }
 
-    public async Task<IReadOnlyList<AnalysisReport>> ListAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<IReadOnlyList<AnalysisReport>> ListAsync(int page, int pageSize, CancellationToken ct = default, string? userId = null)
     {
+        var filter = userId is not null
+            ? Builders<ReportDocument>.Filter.Eq(x => x.UserId, userId)
+            : FilterDefinition<ReportDocument>.Empty;
+
         var docs = await _collection
-            .Find(FilterDefinition<ReportDocument>.Empty)
+            .Find(filter)
             .SortByDescending(x => x.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Limit(pageSize)
@@ -38,9 +42,13 @@ public sealed class ReportRepository : IReportRepository
         return docs.Select(ReportDocumentMapper.ToDomain).ToList();
     }
 
-    public async Task<long> CountAsync(CancellationToken ct = default)
+    public async Task<long> CountAsync(CancellationToken ct = default, string? userId = null)
     {
-        return await _collection.CountDocumentsAsync(FilterDefinition<ReportDocument>.Empty, cancellationToken: ct);
+        var filter = userId is not null
+            ? Builders<ReportDocument>.Filter.Eq(x => x.UserId, userId)
+            : FilterDefinition<ReportDocument>.Empty;
+
+        return await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
     }
 
     public async Task AddAsync(AnalysisReport report, CancellationToken ct = default)

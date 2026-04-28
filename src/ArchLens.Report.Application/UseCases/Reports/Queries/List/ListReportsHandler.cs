@@ -14,8 +14,10 @@ public sealed class ListReportsHandler(IReportRepository repository)
     {
         var paged = new PagedRequest(request.Page, request.PageSize);
 
-        var reports = await repository.ListAsync(paged.Page, paged.PageSize, cancellationToken);
-        var total = await repository.CountAsync(cancellationToken);
+        var userId = request.IsAdmin ? null : request.UserId;
+
+        var reports = await repository.ListAsync(paged.Page, paged.PageSize, cancellationToken, userId);
+        var total = await repository.CountAsync(cancellationToken, userId);
 
         var summaries = reports.Select(r => new ReportSummaryResponse(
             r.Id,

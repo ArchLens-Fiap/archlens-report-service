@@ -6,8 +6,8 @@ public interface IReportRepository
 {
     Task<AnalysisReport?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<AnalysisReport?> GetByAnalysisIdAsync(Guid analysisId, CancellationToken ct = default);
-    Task<IReadOnlyList<AnalysisReport>> ListAsync(int page, int pageSize, CancellationToken ct = default);
-    Task<long> CountAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<AnalysisReport>> ListAsync(int page, int pageSize, CancellationToken ct = default, string? userId = null);
+    Task<long> CountAsync(CancellationToken ct = default, string? userId = null);
     Task AddAsync(AnalysisReport report, CancellationToken ct = default);
     Task DeleteByUserIdAsync(string userId, CancellationToken ct = default);
     Task<bool> DeleteByAnalysisIdAsync(Guid analysisId, CancellationToken ct = default);

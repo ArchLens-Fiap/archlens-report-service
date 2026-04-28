@@ -17,6 +17,9 @@ public sealed class GenerateReportConsumer(
         PropertyNameCaseInsensitive = true
     };
 
+    private static string OrDefault(string? value, string fallback = "Unknown")
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
     public async Task Consume(ConsumeContext<GenerateReportCommand> context)
     {
         var msg = context.Message;
@@ -28,26 +31,29 @@ public sealed class GenerateReportConsumer(
         var result = JsonSerializer.Deserialize<AnalysisResultJson>(msg.ResultJson, JsonOptions)
             ?? throw new InvalidOperationException($"Failed to deserialize analysis result JSON for analysis {msg.AnalysisId}");
 
-        var components = (result.Components ?? []).Select(c =>
-            new IdentifiedComponent(
-                c.Name ?? "Unknown",
-                c.Type ?? "Unknown",
+        var components = (result.Components ?? [])
+            .Where(c => !string.IsNullOrWhiteSpace(c.Name))
+            .Select(c => new IdentifiedComponent(
+                OrDefault(c.Name),
+                OrDefault(c.Type),
                 c.Description ?? "",
                 c.Confidence)).ToList();
 
-        var connections = (result.Connections ?? []).Select(c =>
-            new IdentifiedConnection(
-                c.Source ?? "Unknown",
-                c.Target ?? "Unknown",
-                c.Type ?? "Unknown",
+        var connections = (result.Connections ?? [])
+            .Where(c => !string.IsNullOrWhiteSpace(c.Source) && !string.IsNullOrWhiteSpace(c.Target))
+            .Select(c => new IdentifiedConnection(
+                OrDefault(c.Source),
+                OrDefault(c.Target),
+                OrDefault(c.Type),
                 c.Description ?? "")).ToList();
 
-        var risks = (result.Risks ?? []).Select(r =>
-            new ArchitectureRisk(
-                r.Title ?? "Unknown Risk",
+        var risks = (result.Risks ?? [])
+            .Where(r => !string.IsNullOrWhiteSpace(r.Title))
+            .Select(r => new ArchitectureRisk(
+                OrDefault(r.Title),
                 r.Description ?? "",
-                r.Severity ?? "Medium",
-                r.Category ?? "General",
+                OrDefault(r.Severity, "Medium"),
+                OrDefault(r.Category, "General"),
                 r.Mitigation ?? "")).ToList();
 
         var scores = new ArchitectureScores(
